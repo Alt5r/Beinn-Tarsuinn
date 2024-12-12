@@ -11,8 +11,8 @@ pub fn master(request: Vec<String>) -> Result<String, net::AddrParseError> {
     let requestType: ReqType = requestParsing(&request);
 
     match requestType {
-        ReqType::HTTP => HTTP_handler(request),
-        _ => ERROR_handler(request),
+        ReqType::HTTP => Ok(HTTP_handler(request)),
+        _ => Ok(ERROR_handler(request)),
     }
 
 

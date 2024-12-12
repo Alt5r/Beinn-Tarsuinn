@@ -20,7 +20,7 @@ fn handle_client(mut stream: TcpStream) {
 
                 let request = listify(String::from_utf8_lossy(&buffer[..n]).to_string());
 
-                let r: Result<(), std::net::AddrParseError> = master(request);
+                let r: Result<String, std::net::AddrParseError> = master(request);
 
                 
                 // Echo the message back to the client
