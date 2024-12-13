@@ -23,16 +23,22 @@ fn handle_client(mut stream: TcpStream) {
 
                 // conv to vector of strings for the request parameters
 
-                let request = listify(String::from_utf8_lossy(&buffer[..n]).to_string());
+                //let request = listify(String::from_utf8_lossy(&buffer[..n]).to_string());
 
-                let r: Result<String, std::net::AddrParseError> = master(request);
+                //let r: Result<String, std::net::AddrParseError> = master(request);
 
                 // probably should be some validation here
             
-                let response = forward(&String::from_utf8_lossy(&buffer[..n]).to_string());
+                let response = forward(&String::from_utf8_lossy(&buffer[..n]).to_string()).unwrap();
+
 
                 // some way of returning the response to the client so that the response content
                 // can be rendered client side (http currently)
+
+                // corruently no error checking peak rust
+
+                stream.write_all(response.as_bytes());
+                //stream.flush();
 
                 
                 // Echo the message back to the client

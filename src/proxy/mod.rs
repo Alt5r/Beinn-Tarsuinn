@@ -23,6 +23,7 @@ pub fn forward(original_request: &str) -> std::io::Result<String> {
      // Append the data read to the response
      response.push_str(&String::from_utf8_lossy(&response_buffer[..byts_read]));
     }
+    println!("this is the response data from the req {}", response);
     
     Ok(response) // Return the accumulated response
 
