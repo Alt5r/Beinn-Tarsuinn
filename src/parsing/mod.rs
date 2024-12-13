@@ -1,5 +1,8 @@
 use std::collections::HashMap;
 
+
+/// used to convert to list, now to hash map to help with the firewall 
+/// functionality
 pub fn listify(request: String) -> HashMap<String, String> {
     // Split into lines, and handle possible \r\n endings
     let lines: Vec<&str> = request.split('\n').map(|line| line.strip_suffix("\r").unwrap_or(line)).collect();

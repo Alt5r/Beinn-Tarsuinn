@@ -5,6 +5,8 @@ use core::net;
 mod reqtypes;
 use reqtypes::*;
 
+/// calls the requestParsing funcfion and then calls different firewall functions based of the 
+/// determined protocol 
 pub fn master(request:HashMap<String, String>) -> Result<String, net::AddrParseError> {
     println!("{:?}", request);
     

@@ -7,6 +7,7 @@ pub enum ReqType {
 
 }
 
+/// this will determine the protocol of the request for when its not just http
 pub fn requestParsing(request:&HashMap<String, String>) -> ReqType {
     if let Some(rtype) = request.get("User-Agent") {
         let usr_agnt = request.get("User-Agent").unwrap();

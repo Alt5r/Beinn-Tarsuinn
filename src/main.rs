@@ -10,6 +10,9 @@ use std::collections::HashMap;
 mod parsing;
 use parsing::*;
 
+mod proxy;
+use proxy::*;
+
 fn handle_client(mut stream: TcpStream) {
     let mut buffer = [0; 1024];
     loop {
@@ -23,6 +26,13 @@ fn handle_client(mut stream: TcpStream) {
                 let request = listify(String::from_utf8_lossy(&buffer[..n]).to_string());
 
                 let r: Result<String, std::net::AddrParseError> = master(request);
+
+                // probably should be some validation here
+            
+                let response = forward(&String::from_utf8_lossy(&buffer[..n]).to_string());
+
+                // some way of returning the response to the client so that the response content
+                // can be rendered client side (http currently)
 
                 
                 // Echo the message back to the client
