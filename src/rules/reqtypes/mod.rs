@@ -10,6 +10,7 @@ pub enum ReqType {
 pub fn requestParsing(request:&HashMap<String, String>) -> ReqType {
     if let Some(rtype) = request.get("User-Agent") {
         let usr_agnt = request.get("User-Agent").unwrap();
+        
         if usr_agnt.contains("chrome") {
             ReqType::HTTP
         } else {

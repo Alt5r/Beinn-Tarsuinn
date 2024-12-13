@@ -7,12 +7,19 @@ pub fn listify(request: String) -> HashMap<String, String> {
     // Create a HashMap for headers
     let mut headers = HashMap::new();
 
-    for line in lines {
+    // Handle the first line separately (e.g., "GET / HTTP/1.1")
+    if let Some(first_line) = lines.first() {
+        headers.insert("Received".to_string(), first_line.trim().to_string());
+    }
+
+    // Parse the remaining lines
+    for line in &lines[1..] {
         // Split into key and value based on ':', ignoring invalid lines
         if let Some((key, value)) = line.split_once(':') {
             headers.insert(key.trim().to_string(), value.trim().to_string());
         }
     }
 
+    println!("This is a hashmap of headers: {:?}", headers);
     headers
 }
