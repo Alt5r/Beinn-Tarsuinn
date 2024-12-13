@@ -5,6 +5,8 @@ use std::thread;
 mod rules;  
 use rules::*;
 
+use std::collections::HashMap;
+
 mod parsing;
 use parsing::*;
 
@@ -14,7 +16,7 @@ fn handle_client(mut stream: TcpStream) {
         match stream.read(&mut buffer) {
             Ok(0) => break, // Connection was closed by the client
             Ok(n) => {
-               // println!("Received: {}", String::from_utf8_lossy(&buffer[..n]));
+                println!("Received: {}", String::from_utf8_lossy(&buffer[..n]));
 
                 // conv to vector of strings for the request parameters
 
