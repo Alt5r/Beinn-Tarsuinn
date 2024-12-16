@@ -28,8 +28,10 @@ fn handle_client(mut stream: TcpStream) {
                 //let r: Result<String, std::net::AddrParseError> = master(request);
 
                 // probably should be some validation here
+
+                let trgt = "google.com:80";
             
-                let response = forward(&String::from_utf8_lossy(&buffer[..n]).to_string()).unwrap();
+                let response = forward(&String::from_utf8_lossy(&buffer[..n]).to_string(), trgt).unwrap();
 
 
                 // some way of returning the response to the client so that the response content
@@ -57,7 +59,7 @@ fn handle_client(mut stream: TcpStream) {
 }
 
 fn main() -> std::io::Result<()> {
-    let listener = TcpListener::bind("127.0.0.1:8080")?;
+    let listener = TcpListener::bind("0.0.0.0:8080")?;
     println!("Server listening on 127.0.0.1:8080");
 
     for stream in listener.incoming() {
