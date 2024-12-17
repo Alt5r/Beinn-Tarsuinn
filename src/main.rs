@@ -33,7 +33,7 @@ async fn handle_client(mut stream: tokio::net::TcpStream, addr: SocketAddr) {
                 if let Err(e) = directoryChecker(request, &addr).await {
                     eprintln!("Error in directoryChecker: {}", e);
                 }
-
+                /* 
                 let trgt = "google.com:80";
                 let response = forward(&String::from_utf8_lossy(&buffer[..n]).to_string(), trgt).unwrap();
 
@@ -42,11 +42,16 @@ async fn handle_client(mut stream: tokio::net::TcpStream, addr: SocketAddr) {
                     eprintln!("Failed to send response: {}", e);
                     break;
                 }
-            }
+            
+            */
+        }
             Err(e) => {
                 eprintln!("Failed to read from stream: {}", e);
                 break;
             }
+            
+            
+
         }
     }
     println!("Connection closed.");

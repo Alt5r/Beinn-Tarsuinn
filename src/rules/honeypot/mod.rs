@@ -60,34 +60,71 @@ pub async fn directoryChecker(
                 let created: Option<ThreatActor> = db
                 .create("threat-actors")
                 .content(ThreatActor {
-                    ipv4:ip
+                    ipv4:ip.clone()
                 })
                 .await?;
 
                 let mal_req: Option<MaliciousSignature> = db
                 .create("malicious-requests")
                 .content(MaliciousSignature {
-                    request:req_string
+                    request:req_string.clone()
                 })
                 .await?;
-                let edge_query = format!(r#"
-                LET ta = (SELECT id FROM threat-actors WHERE ipv4 = "{}") 
-                LET ms = (SELECT id FROM malicious-requests WHERE request = "{val}")
-                CREATE (ta->ms) 
-                "#, ip, val=req_string);
-        
-            // Execute the edge creation query (replace "some-ip" and "some-request" with actual values)
-                db.query(edge_query).await?;
-                
+            // Query to get the ThreatActor ID
+
             
-                    println!("Created edge between ThreatActor and MaliciousSignature");
+            let ta_query = format!(r#"
+            SELECT id FROM threat-actors WHERE ipv4 = "{}" LIMIT 1
+            "#, ip);
+
+            println!("Executing ThreatActor query: {}", ta_query);
+
+            let ta_result = db.query(ta_query).await?;
+            let ta_id: Option<String> = ta_result.first()
+            .and_then(|res| res.get("id").and_then(|val| val.to_string().into()));
+
+            if ta_id.is_none() {
+            eprintln!("No ThreatActor found for IP: {}", ip);
+            return Ok(()); // Skip further processing if no ThreatActor found
+            }
+
+            // Query to get the MaliciousSignature ID
+            let ms_query = format!(r#"
+            SELECT id FROM malicious-requests WHERE request = "{}" LIMIT 1
+            "#, req_string);
+
+            println!("Executing MaliciousSignature query: {}", ms_query);
+
+            let ms_result = db.query(ms_query).await?;
+            let ms_id: Option<String> = ms_result.first()
+            .and_then(|res| res.get("id").and_then(|val| val.to_string().into()));
+
+            if ms_id.is_none() {
+            eprintln!("No MaliciousSignature found for request: {}", req_string);
+            return Ok(()); // Skip further processing if no MaliciousSignature found
+            }
+
+            // Query to create the edge (RELATE)
+            let relate_query = format!(r#"
+            RELATE {}->malicious-request->{}
+            "#, ta_id.unwrap(), ms_id.unwrap());
+
+            println!("Executing RELATE query: {}", relate_query);
+
+            let relate_result = db.query(relate_query).await;
+
+            match relate_result {
+            Ok(_) => println!("Successfully created edge between ThreatActor and MaliciousSignature."),
+            Err(e) => eprintln!("Error creating edge: {:?}", e),
+            }
                 } else {
-                    println!("unable to create edge");
+                    println!("no amlicious content");
                 }
                 return Ok(());
             }
         }
+        Ok(())
     }
 
-    Ok(())
-    }
+    
+    
