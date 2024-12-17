@@ -23,7 +23,7 @@ pub fn forward(original_request: &str, trgt:&str) -> std::io::Result<String> {
         &format!("Host: {}\r\n", trgt),
     );
 
-    println!("now host paramter should be the website to bne forwarded to{}", or);
+    println!("now host paramter should be the website to bne forwarded to {}", or);
 
     trgt_strm.write_all(or.as_str().as_bytes())?;
     trgt_strm.flush()?;
