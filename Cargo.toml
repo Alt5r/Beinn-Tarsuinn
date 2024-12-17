@@ -4,3 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+reqwest = "0.12.9"
+serde = "1.0.216"
+surrealdb = "2.1.3"
+tokio = "1.42.0"

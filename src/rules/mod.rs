@@ -5,6 +5,9 @@ use core::net;
 mod reqtypes;
 use reqtypes::*;
 
+pub mod honeypot;
+use honeypot::*;
+
 /// calls the requestParsing funcfion and then calls different firewall functions based of the 
 /// determined protocol 
 pub fn master(request:HashMap<String, String>) -> Result<String, net::AddrParseError> {
