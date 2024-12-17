@@ -1,9 +1,15 @@
 use std::{collections::HashMap, net::SocketAddr};
 
 use reqwest;
+use serde::{Serialize, Deserialize}; // For the Serialize and Deserialize traits
+//use serde_json; // For working with JSON, if required
+
 //use serde_json::Value;
 //use tokio;
-
+#[derive(serde::Serialize, serde::Deserialize)]
+struct ThreatActor {
+    ipv4:String,
+}
 
 use surrealdb::engine::any;
 use surrealdb::Surreal;
@@ -40,8 +46,25 @@ pub async fn directoryChecker(
         for keyword in key_words {
             if req_string.contains(keyword) {
                 println!("Malicious request detected from {:?}!", client_addr);
+                            // Create the ThreatActor instance
+                /* 
+                let threat_actor: ThreatActor = ThreatActor {
+                    ipv4: client_addr.to_string(),
+                };
+                */
+                let resc: &str = "threat-actors";
                 // Log or handle the malicious request here
-                break;
+                //db.update::<ThreatActor>("threat-actors").merge(threat_actor).await?;
+
+                //let ta: Option<ThreatActor> = db.create("threat-actor").await?;
+
+                let created: Option<ThreatActor> = db
+                .create("threat-actor")
+                .content(ThreatActor {
+                    ipv4:client_addr.to_string()
+                })
+                .await?;
+
             }
         }
     }
