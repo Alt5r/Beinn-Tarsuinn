@@ -1,43 +1,50 @@
-use std::{collections::HashMap, os::unix::net::SocketAddr};
+use std::{collections::HashMap, net::SocketAddr};
 
 use reqwest;
-use serde_json::Value;
+//use serde_json::Value;
 //use tokio;
 
-use surrealdb::engine::remote::ws::Client;
+
+use surrealdb::engine::any;
 use surrealdb::Surreal;
 use surrealdb::opt::auth::Namespace;
-//use surrealdb::engine::any::Any;
-use surrealdb::engine::remote::ws::Wss;
+//use std::collections::HashMap;
+//use std::net::SocketAddr;
 
-
-
-
-
-pub fn directoryChecker(request:HashMap<String, String>, client_addr:&SocketAddr) -> Result<(), Box<dyn std::error::Error>> {
-
+pub async fn directoryChecker(
+    request: HashMap<String, String>,
+    client_addr: &SocketAddr
+) -> Result<(), Box<dyn std::error::Error>> {
     let key_words = ["username", "password", "cgi", "root", "admin", "cd"];
-     // Connect to SurrealDB
-    let mut db = Surreal::<Wss>::new("wss://testing-honeypo-069tap2kaptiv68a587151t91o.aws-euw1.surreal.cloud/rpc");
-    //let db = Surreal::<Client>::connect("wss://testing-honeypo-069tap2kaptiv68a587151t91o.aws-euw1.surreal.cloud/rpc")?;
 
+    // Connect to SurrealDB asynchronously
+    let db = any::connect("wss://testing-honeypo-069tap2kaptiv68a587151t91o.aws-euw1.surreal.cloud/rpc").await?;
+    //db.connect("wss://testing-honeypo-069tap2kaptiv68a587151t91o.aws-euw1.surreal.cloud/rpc").await?;
+
+    // Sign in with async call
     db.signin(Namespace {
-        namespace: "threat_monitoring", // Replace with your namespace
-        username: "honeypot",      // Use 'honeypot' username as the 'email'
+        namespace: "testing",
+        username: "honeypot",
         password: "password",
-    })?;
-     // Specify namespace and database
-    db.use_ns("testing").use_db("honeypot-data")?;
+    }).await?;
 
+    // Select the namespace and database
+    db.use_ns("testing").use_db("honeypot-data").await?;
+
+    println!("Successfully connected and authenticated to SurrealDB!");
+
+    // Check for malicious requests
     if let Some(req) = request.get("Received") {
-        let req = req.to_string();
+        let req_string = req.to_string();
 
-        for k in key_words {
-            if req.contains(k) {
-                // malicious request, call database quesry for client_addr and for the malicious request
+        for keyword in key_words {
+            if req_string.contains(keyword) {
+                println!("Malicious request detected from {:?}!", client_addr);
+                // Log or handle the malicious request here
+                break;
             }
         }
     }
 
-        Ok(())
+    Ok(())
 }
