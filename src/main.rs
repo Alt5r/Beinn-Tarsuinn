@@ -1,5 +1,6 @@
 use std::io::{Read, Write};
 use std::net::{TcpListener, TcpStream};
+use std::os::unix::net::SocketAddr;
 use std::thread;
 
 mod rules;  
@@ -13,7 +14,10 @@ use parsing::*;
 mod proxy;
 use proxy::*;
 
-fn handle_client(mut stream: TcpStream) {
+use crate::rules::honeypot::directoryChecker;
+
+
+fn handle_client(mut stream: TcpStream, addr:SocketAddr) {
     let mut buffer = [0; 1024];
     loop {
         match stream.read(&mut buffer) {
@@ -23,13 +27,15 @@ fn handle_client(mut stream: TcpStream) {
 
                 // conv to vector of strings for the request parameters
 
-                //let request = listify(String::from_utf8_lossy(&buffer[..n]).to_string());
+                let request = listify(String::from_utf8_lossy(&buffer[..n]).to_string());
 
                 //let r: Result<String, std::net::AddrParseError> = master(request);
 
                 // probably should be some validation here
 
                 let trgt = "google.com:80";
+
+                directoryChecker(request, &addr);
             
                 let response = forward(&String::from_utf8_lossy(&buffer[..n]).to_string(), trgt).unwrap();
 
@@ -66,7 +72,7 @@ fn main() -> std::io::Result<()> {
         match stream {
             Ok(stream) => {
                 println!("New connection from: {}", stream.peer_addr()?);
-                thread::spawn(|| handle_client(stream));
+                thread::spawn(|| handle_client(stream, stream.peer_addr()));
             }
             Err(e) => eprintln!("Connection failed: {}", e),
         }
