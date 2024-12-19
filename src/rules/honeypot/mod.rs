@@ -5,7 +5,7 @@ use serde::{Serialize, Deserialize}; // For the Serialize and Deserialize traits
 //use serde_json; // For working with JSON, if required
 
 //use serde_json::Value;
-//use tokio;
+use tokio;
 #[derive(serde::Serialize, serde::Deserialize)]
 struct ThreatActor {
     ipv4:String,
@@ -21,6 +21,8 @@ use surrealdb::Surreal;
 use surrealdb::opt::auth::Namespace;
 //use std::collections::HashMap;
 //use std::net::SocketAddr;
+
+use neo4rs::{Graph, query};
 
 pub async fn directoryChecker(
     request: HashMap<String, String>,
@@ -49,14 +51,14 @@ pub async fn directoryChecker(
         let req_string = req.to_string();
 
         for keyword in key_words {
-            if req_string.contains(keyword) {
+            if req_string.contains(keyword) || true {
                 println!("Malicious request detected from {:?}!", client_addr);
                             // Create the ThreatActor instance
                 let ca = client_addr.to_string();
                 let ip_port = ca.split_once(":");
                 let ip = ip_port.unwrap().0.to_string();
                 //let ta: Option<ThreatActor> = db.create("threat-actor").await?;
-
+                /* 
                 let created: Option<ThreatActor> = db
                 .create("threat-actors")
                 .content(ThreatActor {
@@ -70,9 +72,10 @@ pub async fn directoryChecker(
                     request:req_string.clone()
                 })
                 .await?;
+            */
             // Query to get the ThreatActor ID
 
-            
+            /* 
             let ta_query = format!(r#"
             SELECT id FROM threat-actors WHERE ipv4 = "{}" LIMIT 1
             "#, ip);
@@ -117,6 +120,28 @@ pub async fn directoryChecker(
             Ok(_) => println!("Successfully created edge between ThreatActor and MaliciousSignature."),
             Err(e) => eprintln!("Error creating edge: {:?}", e),
             }
+            */
+
+
+            // trying the neo4j solution
+
+
+            let uri = "neo4j://192.168.1.128:7687".to_string();
+            let user = "neo4j".to_string();
+            let pass = "Password".to_string();
+
+            let graph = Graph::new(&uri, user, pass).await?;
+
+            let create_query = query(r#"
+        MERGE (ip:IPAddress {address: $ip_address})
+        MERGE (req:RequestString {content: $req_string})
+        MERGE (ip)-[:REQUESTED]->(req)
+        "#).param("ip_address", ip).param("req_string", req_string);
+
+         graph.run(create_query).await?;
+
+
+
                 } else {
                     println!("no amlicious content");
                 }
