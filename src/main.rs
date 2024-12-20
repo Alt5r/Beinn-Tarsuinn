@@ -32,15 +32,22 @@ async fn handle_client(mut stream: tokio::net::TcpStream, addr: SocketAddr) {
                 // Convert the request into a vector of strings for parameters
                 let request = listify(String::from_utf8_lossy(&buffer[..n]).to_string());
 
-                if let Err(e) = get_agents().await {
+                if let Ok(lst) = get_agents().await {
+                    println!("Have a list from csv")
+                    // Call your directoryChecker function
+                
+                
+                if let Err(e) = directoryChecker(request, &addr, lst).await {
+                    eprintln!("Error in directoryChecker: {}", e);
+                }
+
+
+                } else {
                     eprintln!("error in csv reading: {}", e);
                 }
                 
 
-                // Call your directoryChecker function
-                if let Err(e) = directoryChecker(request, &addr).await {
-                    eprintln!("Error in directoryChecker: {}", e);
-                }
+                
                 /* 
                 let trgt = "google.com:80";
                 let response = forward(&String::from_utf8_lossy(&buffer[..n]).to_string(), trgt).unwrap();

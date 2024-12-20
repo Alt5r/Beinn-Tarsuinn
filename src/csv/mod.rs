@@ -2,6 +2,8 @@ use std::{error::Error, io, process, fs};
 use csv::Reader;
 
 #[derive(Debug, serde::Deserialize)]
+
+/// contains data abouta malicious haeader
 pub struct header {
     header_content:String,
     reason:String,
@@ -21,6 +23,28 @@ impl header {
         header {header_content: v1, reason: v2, tool:v3, cat:v4, link:v5, severity:v6, metadata_usage:v7}
     }
 
+    pub fn get_header(self) -> String {
+        self.header_content
+    }
+
+    pub fn get_reason(self) -> String {
+        self.reason
+    }
+    pub fn get_tool(self) -> String {
+        self.tool
+    }
+    pub fn get_cat(self) -> String {
+        self.cat
+    }
+    pub fn get_link(self) -> String {
+        self.link
+    }
+    pub fn get_severity(self) -> String {
+        self.severity
+    }
+    pub fn get_meta(self) -> String {
+        self.metadata_usage
+    }
 
 }
 
