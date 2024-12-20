@@ -13,6 +13,9 @@ mod proxy;
 use proxy::*;
 use crate::rules::honeypot::directoryChecker;
 
+mod csv;
+use csv::*;
+
 use tokio::io::AsyncReadExt; // Add this import
 use tokio::io::AsyncWriteExt; // Add this import
 
@@ -24,10 +27,15 @@ async fn handle_client(mut stream: tokio::net::TcpStream, addr: SocketAddr) {
         match stream.read(&mut buffer).await {
             Ok(0) => break, // Connection was closed by the client
             Ok(n) => {
-                println!("Received: {}", String::from_utf8_lossy(&buffer[..n]));
+                 // println!("Received: {}", String::from_utf8_lossy(&buffer[..n]));
 
                 // Convert the request into a vector of strings for parameters
                 let request = listify(String::from_utf8_lossy(&buffer[..n]).to_string());
+
+                if let Err(e) = get_agents().await {
+                    eprintln!("error in csv reading: {}", e);
+                }
+                
 
                 // Call your directoryChecker function
                 if let Err(e) = directoryChecker(request, &addr).await {
