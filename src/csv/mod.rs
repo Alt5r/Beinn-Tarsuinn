@@ -23,32 +23,32 @@ impl header {
         header {header_content: v1, reason: v2, tool:v3, cat:v4, link:v5, severity:v6, metadata_usage:v7}
     }
 
-    pub fn get_header(self) -> String {
-        self.header_content
+    pub fn get_header(&self) -> &String {
+        &self.header_content
     }
 
-    pub fn get_reason(self) -> String {
-        self.reason
+    pub fn get_reason(&self) -> &String {
+        &self.reason
     }
-    pub fn get_tool(self) -> String {
-        self.tool
+    pub fn get_tool(&self) -> &String {
+        &self.tool
     }
-    pub fn get_cat(self) -> String {
-        self.cat
+    pub fn get_cat(&self) -> &String {
+        &self.cat
     }
-    pub fn get_link(self) -> String {
-        self.link
+    pub fn get_link(&self) -> &String {
+        &self.link
     }
-    pub fn get_severity(self) -> String {
-        self.severity
+    pub fn get_severity(&self) -> &String {
+        &self.severity
     }
-    pub fn get_meta(self) -> String {
-        self.metadata_usage
+    pub fn get_meta(&self) -> &String {
+        &self.metadata_usage
     }
 
 }
 
-pub async fn get_agents() -> Result<Vec<header>, Box<dyn Error>> {
+pub async fn get_agents() -> Result<Vec<header>, Box<dyn Error + Send + Sync>> {
     if fs::metadata("data.csv").is_ok() {
         println!("the file is found")
     } else {
@@ -61,7 +61,7 @@ pub async fn get_agents() -> Result<Vec<header>, Box<dyn Error>> {
     for result in rdr.records() {
         let record = result?;
 
-        println!("Record: {:?}", record);
+        //println!("Record: {:?}", record);
         let r:Vec<String> = record.iter().map(|s| s.to_string()).collect();
 
         lst.push(header::new(r[0].clone(), r[1].clone(), r[2].clone(), r[3].clone(), r[4].clone(), r[7].clone(), r[8].clone()))

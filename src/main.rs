@@ -33,7 +33,7 @@ async fn handle_client(mut stream: tokio::net::TcpStream, addr: SocketAddr) {
                 let request = listify(String::from_utf8_lossy(&buffer[..n]).to_string());
 
                 if let Ok(lst) = get_agents().await {
-                    println!("Have a list from csv")
+                    println!("Have a list from csv");
                     // Call your directoryChecker function
                 
                 
@@ -43,7 +43,7 @@ async fn handle_client(mut stream: tokio::net::TcpStream, addr: SocketAddr) {
 
 
                 } else {
-                    eprintln!("error in csv reading: {}", e);
+                    //eprintln!("error in csv reading: {}", e);
                 }
                 
 
