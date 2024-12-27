@@ -37,8 +37,24 @@ async fn handle_client(mut stream: tokio::net::TcpStream, addr: SocketAddr) {
                     // Call your directoryChecker function
                 
                 
-                if let Err(e) = directoryChecker(request, &addr, lst).await {
-                    eprintln!("Error in directoryChecker: {}", e);
+                if let Ok(result) = directoryChecker(request, &addr, lst).await {
+                    if result == true {
+                        // serve the request
+                        let r = "\
+                            HTTP/1.1 200 OK\r\n\
+                            Content-Type: text/html; charset=UTF-8\r\n\
+                            Content-Length: 51\r\n\
+                            \r\n\
+                            <html>\
+                                <head><title>How bout get fucked</title></head>\
+                                <body><h1>Hello, world!</h1></body>\
+                            </html>";
+
+                            stream.write_all(r.as_bytes()).await;
+                    } else {
+                        // dont serve the request 
+                        println!("client was malicious so no content was served")
+                    }
                 }
 
 

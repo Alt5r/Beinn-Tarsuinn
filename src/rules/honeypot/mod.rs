@@ -26,12 +26,26 @@ use surrealdb::opt::auth::Namespace;
 
 use neo4rs::{Graph, query};
 
+pub async fn hashmap_to_string(map: HashMap<String, String>) -> String {
+    let mut result = String::new();
+    result.push('{');
+    for (key, value) in &map {
+        result.push_str(&format!("\"{}\": \"{}\", ", key, value));
+    }
+    // Remove the trailing comma and space, if present
+    if result.ends_with(", ") {
+        result.truncate(result.len() - 2);
+    }
+    result.push('}');
+    result
+}
+
 pub async fn directoryChecker(
     request: HashMap<String, String>,
     client_addr: &SocketAddr,
     user_agents:Vec<header>
-) -> Result<(), Box<dyn std::error::Error>> {
-    let key_words = ["username", "password", "cgi", "root", "admin", "cd", "wp"];
+) -> Result<bool, Box<dyn std::error::Error + Send + Sync>> {
+    let key_words = ["username", "password", "cgi", "root", "admin", "cd", "wp", "wget", "||", "rm"];
 
     if let Some(agent) = request.get("User-Agent") {
         for h in user_agents {
@@ -61,17 +75,15 @@ pub async fn directoryChecker(
         .param("usage", h.get_meta().as_str());
 
         graph.run(query_agent).await?;
+        return Ok(false)
             }
         }
-    } else {
-   
-
-    // Check for malicious requests
-    if let Some(req) = request.get("Received") {
-        let req_string = req.to_string();
+    } else if let Some(req) = request.get("Received") {
+        // let req_string = request;
 
         for keyword in key_words {
-            if req_string.contains(keyword) || true {
+            for (key, value) in request.clone() { 
+            if value.contains(keyword) || true {
                 println!("Malicious request detected from {:?}!", client_addr);
                             // Create the ThreatActor instance
                 let ca = client_addr.to_string();
@@ -87,7 +99,7 @@ pub async fn directoryChecker(
 
             let graph = Graph::new(&uri, user, pass).await?;
 
-            
+            let req_string =  hashmap_to_string(request).await;
             
             let create_query = query(r#"
         MERGE (ip:IPAddress {address: $ip_address})
@@ -97,17 +109,20 @@ pub async fn directoryChecker(
 
          graph.run(create_query).await?;
 
-
+        return Ok(false)
 
                 } else {
                     println!("no amlicious content");
                 }
-                return Ok(());
-            }
+                return Ok(false);
         }
+            }
+        } else {
+            return Ok(true);
+        }
+        Ok(true)
     }
-        Ok(())
-    }
+ 
 
     
     
